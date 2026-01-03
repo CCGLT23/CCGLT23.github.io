@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成人ADHD症状筛查量表（ASRS v1.1）</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* 核心样式（保留） */
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: linear-gradient(120deg, #fdf2f8 0%, #e8f4f8 100%);
+            color: #4a5568;
+            min-height: 100vh;
+            padding: 1rem 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 1rem auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(149, 157, 165, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+            animation: fadeIn 0.8s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .question {
+            margin-bottom: 1.8rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #faf0f5 0%, #f0f8fb 100%);
+            border: 1px solid rgba(240, 248, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+        .question:hover {
+            box-shadow: 0 4px 12px rgba(224, 231, 255, 0.4);
+        }
+        .unanswered {
+            border-left: 4px solid #ed8936;
+        }
+        .option {
+            margin: 0.8rem 0;
+            padding: 0.3rem 0;
+            cursor: pointer;
+        }
+        input[type="radio"] {
+            margin-right: 0.8rem;
+            accent-color: #9f7aea;
+        }
+        .btn {
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #9f7aea 0%, #667eea 100%);
+            box-shadow: 0 4px 12px rgba(159, 122, 234, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #805ad5 0%, #5a67d8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(159, 122, 234, 0.4);
+        }
+        .btn-outline-secondary {
+            background: rgba(255, 255, 255, 0.8);
+            color: #718096;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-outline-secondary:hover {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+        .btn-outline-primary {
+            background: rgba(255, 255, 255, 0.8);
+            color: #9f7aea;
+            border: 1px solid #e9d8fd;
+        }
+        .btn-outline-primary:hover {
+            background: #fdf2f8;
+            color: #805ad5;
+            border: 1px solid #d6bcfa;
+        }
+        .btn-group {
+            margin-top: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .result-card {
+            background: linear-gradient(135deg, #fef7fb 0%, #f5fafe 100%);
+            padding: 2rem;
+            border-radius: 18px;
+            margin: 2rem 0;
+            border: 1px solid rgba(240, 248, 255, 0.8);
+            box-shadow: 0 4px 16px rgba(224, 231, 255, 0.2);
+        }
+        .risk-high {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+        .risk-normal {
+            color: #38a169;
+            font-weight: 600;
+        }
+        .card {
+            border-radius: 18px;
+            border: none;
+            background: linear-gradient(135deg, #faf0f5 0%, #f0f8fb 100%);
+            box-shadow: 0 4px 16px rgba(224, 231, 255, 0.2);
+        }
+        .marketing-module {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #fcf1f7 0%, #eaf6fa 100%);
+            border: 1px solid rgba(240, 248, 255, 0.7);
+        }
+        .text-primary-emphasis {
+            color: #805ad5 !important;
+            font-weight: 600;
+        }
+        /* 弹窗样式优化 */
+        .detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 18px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close-modal {
+            float: right;
+            border: none;
+            background: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #718096;
+        }
+        .disclaimer {
+            font-size: 0.95rem;
+            color: #718096;
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed #e2e8f0;
+            line-height: 1.8;
+        }
+        h2 {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 1.8rem;
+            position: relative;
+            padding-bottom: 0.8rem;
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #9f7aea 0%, #667eea 100%);
+            border-radius: 3px;
+        }
+        h5 {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        h6 {
+            color: #2d3748;
+            font-weight: 600;
+        }
+        .text-muted {
+            color: #718096 !important;
+            line-height: 1.6;
+        }
+        .modal-body p {
+            margin-bottom: 0.8rem;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        /* 新增：小红书标题栏样式 */
+        .xiaohongshu-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #fdf2f8 0%, #fef7fb 100%);
+            border-radius: 15px;
+            border: 1px solid rgba(240, 248, 255, 0.6);
+        }
+        .xiaohongshu-icon {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 8px; /* 轻微圆角适配小红书logo风格 */
+        }
+        .xiaohongshu-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #805ad5;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 第1页：声明同意页（新增小红书标题栏） -->
+        <div id="page1" class="page active">
+            <!-- 新增：小红书图标+文字区域（替换为指定logo） -->
+            <div class="xiaohongshu-header">
+                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/18d3b8fd8cde4972b4d13803a3353071.png~tplv-a9rns2rl98-image.png?rcl=2026010318585421F417F6ACDB46ABA258&rk3s=8e244e95&rrcfp=dafada99&x-expires=2083661935&x-signature=2DnjwyXSI2bFVsc7EXvwMqhhfK0%3D" class="xiaohongshu-icon">
+                <span class="xiaohongshu-text">小星的趣味心测</span>
+            </div>
+            
+            <h2 class="text-center mb-5">成人ADHD症状筛查量表（ASRS v1.1）</h2>
+            <div class="card mb-5">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">使用声明</h5>
+                    <p class="card-text mb-2">1. 本量表基于世界卫生组织（WHO）发布的ASRS v1.1标准开发，仅用于成人ADHD症状的初步筛查，<strong>不构成医疗诊断或治疗建议</strong>。</p>
+                    <p class="card-text mb-2">2. 答题数据为敏感信息，仅本地存储，不会上传至第三方服务器，您可随时删除。</p>
+                    <p class="card-text mb-2">3. 筛查结果高风险者建议前往正规医疗机构精神科、心理科就诊，由专业人员评估确诊。</p>
+                    <p class="card-text">4. 本量表仅适用于18周岁及以上成年人，未成年人需监护人陪同使用。</p>
+                </div>
+            </div>
+            <div class="marketing-module mb-5">
+                <h6 class="text-primary-emphasis mb-2">💡 新用户专属福利</h6>
+                <p class="text-muted mb-3">添加微信【XXX123456】，测试后可领取1次免费的症状文字解读（限前100名）</p>
+                <div class="d-flex justify-content-center">
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/3ceb451627c743e2b82c1389374701ee.jpg~tplv-a9rns2rl98-image.png?rcl=20260103182954434D35C7C347015B11E5&rk3s=8e244e95&rrcfp=dafada99&x-expires=2083660194&x-signature=a34h5kHSjDpWlJ8Rs%2Flt%2B1B9mW0%3D" 
+             alt="微信二维码" 
+             class="rounded" 
+             style="width:150px;height:150px;">
+                </div>
+            </div>
+            <div class="form-check mb-5">
+                <input class="form-check-input" type="checkbox" id="agree">
+                <label class="form-check-label fs-6" for="agree">
+                    我已阅读、同意上述声明，自愿进行本次筛查
+                </label>
+            </div>
+            <button id="toPage2" class="btn btn-primary btn-lg w-100" disabled>开始自测，3分钟理清注意力问题</button>
+        </div>
+
+        <!-- 第2页：答题页 -->
+        <div id="page2" class="page">
+            <h2 class="text-center mb-5">答题页（共3页，当前第<span id="currentPage">1</span>/3页）</h2>
+            <p class="text-muted text-center mb-4">请根据过去6个月的感受和行为，为每题选择合适的频率：0=从不，1=很少，2=有时，3=经常</p>
+            <div id="questionsContainer"></div>
+            <div class="btn-group">
+                <button id="prevPage" class="btn btn-outline-secondary" disabled>上一题</button>
+                <button id="nextPage" class="btn btn-primary">下一题</button>
+            </div>
+        </div>
+
+        <!-- 第3页：结果页（已删除指定模块） -->
+        <div id="page3" class="page">
+            <h2 class="text-center mb-5">筛查结果报告</h2>
+            <div class="result-card mb-4">
+                <h5>一、我的测试记录</h5>
+                <div id="testRecord">
+                    <p class="text-muted">暂无历史测试记录</p>
+                </div>
+            </div>
+            <div class="result-card">
+                <h5>二、风险等级评估</h5>
+                <p class="mb-2">您的核心题（A部分6题）高风险项：<span id="coreScore">0</span>/6</p>
+                <p class="mb-2">风险等级：<span id="riskLevel" class="risk-normal">一般提示</span></p>
+                <p>解读：<span id="riskDesc">您的症状与ADHD相关性较低，但仍可结合自身感受咨询专业人士。</span></p>
+            </div>
+            <div class="result-card">
+                <h5>三、详细得分</h5>
+                <p class="mb-1">核心筛查题（A部分6题）总分：<span id="aScore">0</span>/18</p>
+                <p class="mb-1">补充评估题（B部分12题）总分：<span id="bScore">0</span>/36</p>
+                <p>18题总得分：<span id="totalScore">0</span>/54</p>
+            </div>
+            <div class="result-card">
+                <h5>四、建议与提示</h5>
+                <ul style="line-height: 1.8; padding-left: 1.5rem;">
+                    <li>本结果仅为初步筛查，不能替代专业诊断，确诊需经精神科医生按DSM-5/ICD-11标准评估。</li>
+                    <li>若您在工作或学习中存在注意力或冲动控制等问题并影响生活，建议及时就医。</li>
+                    <li>正规就医渠道：当地三甲医院精神科或心理科；专业心理健康服务机构；卫健委认证的心理援助热线。</li>
+                </ul>
+            </div>
+            <button id="restartTest" class="btn btn-outline-primary w-100">重新自测，跟踪症状变化</button>
+            <div class="disclaimer">
+                <p>免责声明：本报告仅为筛查参考，不构成医疗诊断或治疗建议。因使用本报告产生的任何决策及后果，由用户自行承担。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测试记录详情弹窗 -->
+    <div class="detail-modal" id="detailModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">×</button>
+            <h5 class="mb-3">测试详情</h5>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // 量表题目数据（18题完整）
+        const questions = [
+            { id: 1, type: 'A', content: '完成项目具有挑战性的部分后，很难收尾细节工作。' },
+            { id: 2, type: 'A', content: '面对需要规划的任务时，难以做到井然有序。' },
+            { id: 3, type: 'A', content: '经常忘记约会或重要事项或需要办理的事务。' },
+            { id: 4, type: 'A', content: '回避或拖延需要长时间专注思考的复杂任务。' },
+            { id: 5, type: 'A', content: '难以长时间保持坐姿，总想起身活动或找事情做。' },
+            { id: 6, type: 'A', content: '感觉体内像有“马达”驱动，无法安静待着。' },
+            { id: 7, type: 'B', content: '处理单调或重复的工作时，容易粗心犯错。' },
+            { id: 8, type: 'B', content: '别人说话时，很难从头到尾专心听完（容易走神）。' },
+            { id: 9, type: 'B', content: '在家或工作场所，容易被周围的活动或声音分散注意力。' },
+            { id: 10, type: 'B', content: '很难按计划执行任务，常偏离既定安排。' },
+            { id: 11, type: 'B', content: '经常同时开展多个项目，难以顺利完成其中任何一个。' },
+            { id: 12, type: 'B', content: '在会议或需要静坐的场合，会忍不住离开座位。' },
+            { id: 13, type: 'B', content: '即使在不需要快速行动的场景下，也会表现得急躁匆忙。' },
+            { id: 14, type: 'B', content: '独处时难以让自己放松，总觉得需要保持忙碌。' },
+            { id: 15, type: 'B', content: '社交中会在别人还没说完话时就插嘴或抢答。' },
+            { id: 16, type: 'B', content: '经常感到精力不集中，影响工作与日常事务效率。' },
+            { id: 17, type: 'B', content: '排队等待时，很难保持耐心。' },
+            { id: 18, type: 'B', content: '别人忙碌时，会忍不住打断或打扰对方。' }
+        ];
+
+        // 全局变量
+        let currentPage = 1;
+        let answers = new Array(18).fill(null);
+        let testRecords = JSON.parse(localStorage.getItem('adhdTestRecords')) || [];
+
+        // DOM元素（已移除付费服务、复制文案相关元素）
+        const page1 = document.getElementById('page1');
+        const page2 = document.getElementById('page2');
+        const page3 = document.getElementById('page3');
+        const agreeCheckbox = document.getElementById('agree');
+        const toPage2Btn = document.getElementById('toPage2');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const currentPageText = document.getElementById('currentPage');
+        const questionsContainer = document.getElementById('questionsContainer');
+        const coreScoreText = document.getElementById('coreScore');
+        const riskLevelText = document.getElementById('riskLevel');
+        const riskDescText = document.getElementById('riskDesc');
+        const aScoreText = document.getElementById('aScore');
+        const bScoreText = document.getElementById('bScore');
+        const totalScoreText = document.getElementById('totalScore');
+        const restartTestBtn = document.getElementById('restartTest');
+        const testRecordEl = document.getElementById('testRecord');
+        const detailModal = document.getElementById('detailModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const modalBody = document.getElementById('modalBody');
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面DOM加载完成，开始初始化'); // 调试日志
+            
+            // 恢复答题进度
+            const savedAnswers = localStorage.getItem('adhdTestAnswers');
+            if (savedAnswers) {
+                answers = JSON.parse(savedAnswers);
+                if (!answers.includes(null)) {
+                    currentPage = 3;
+                    page1.classList.remove('active');
+                    page2.classList.add('active');
+                    renderQuestions();
+                    calculateResult();
+                    page2.classList.remove('active');
+                    page3.classList.add('active');
+                }
+            }
+
+            // 渲染测试记录
+            renderTestRecords();
+
+            // 弹窗关闭事件
+            closeModalBtn.addEventListener('click', () => {
+                detailModal.style.display = 'none';
+            });
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) detailModal.style.display = 'none';
+            });
+
+            // 同意复选框事件
+            agreeCheckbox.addEventListener('change', function() {
+                console.log('复选框状态：', this.checked); // 调试日志
+                toPage2Btn.disabled = !this.checked;
+                // 强制刷新按钮状态（兼容部分浏览器视觉延迟）
+                if (this.checked) {
+                    toPage2Btn.removeAttribute('disabled');
+                } else {
+                    toPage2Btn.setAttribute('disabled', 'disabled');
+                }
+            });
+
+            // 开始自测按钮点击事件
+            toPage2Btn.addEventListener('click', function() {
+                console.log('点击了开始自测按钮'); // 调试日志
+                page1.classList.remove('active');
+                page2.classList.add('active');
+                renderQuestions();
+            });
+
+            // 重新自测按钮事件
+            restartTestBtn.addEventListener('click', function() {
+                answers = new Array(18).fill(null);
+                currentPage = 1;
+                localStorage.removeItem('adhdTestAnswers');
+                page3.classList.remove('active');
+                page1.classList.add('active');
+                agreeCheckbox.checked = false;
+                toPage2Btn.disabled = true;
+            });
+
+            // 渲染答题页题目
+            function renderQuestions() {
+                const startIndex = (currentPage - 1) * 6;
+                const endIndex = startIndex + 6;
+                const currentQuestions = questions.slice(startIndex, endIndex);
+                
+                questionsContainer.innerHTML = '';
+                currentQuestions.forEach((q, index) => {
+                    const questionIndex = startIndex + index;
+                    const isAnswered = answers[questionIndex] !== null;
+                    const questionHtml = `
+                        <div class="question ${!isAnswered ? 'unanswered' : ''}">
+                            <h6 class="mb-3">${q.id}. ${q.content}</h6>
+                            <div class="option">
+                                <input type="radio" name="q${questionIndex}" id="q${questionIndex}_0" value="0" ${answers[questionIndex] === '0' ? 'checked' : ''}>
+                                <label for="q${questionIndex}_0">0=从不</label>
+                            </div>
+                            <div class="option">
+                                <input type="radio" name="q${questionIndex}_1" value="1" ${answers[questionIndex] === '1' ? 'checked' : ''}>
+                                <label for="q${questionIndex}_1">1=很少</label>
+                            </div>
+                            <div class="option">
+                                <input type="radio" name="q${questionIndex}_2" value="2" ${answers[questionIndex] === '2' ? 'checked' : ''}>
+                                <label for="q${questionIndex}_2">2=有时</label>
+                            </div>
+                            <div class="option">
+                                <input type="radio" name="q${questionIndex}_3" value="3" ${answers[questionIndex] === '3' ? 'checked' : ''}>
+                                <label for="q${questionIndex}_3">3=经常</label>
+                            </div>
+                        </div>
+                    `;
+                    questionsContainer.innerHTML += questionHtml;
+                });
+                currentPageText.textContent = currentPage;
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.textContent = currentPage === 3 ? '提交答案，获取专属风险分析' : '下一题';
+            }
+
+            // 监听答题选择
+            questionsContainer.addEventListener('change', (e) => {
+                if (e.target.type === 'radio') {
+                    const questionIndex = parseInt(e.target.name.replace('q', ''));
+                    answers[questionIndex] = e.target.value;
+                    localStorage.setItem('adhdTestAnswers', JSON.stringify(answers));
+                    e.target.closest('.question').classList.remove('unanswered');
+                }
+            });
+
+            // 上一题
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderQuestions();
+                }
+            });
+
+            // 下一题/提交
+            nextPageBtn.addEventListener('click', () => {
+                const startIndex = (currentPage - 1) * 6;
+                const endIndex = startIndex + 6;
+                let unansweredCount = 0;
+                for (let i = startIndex; i < endIndex; i++) {
+                    if (answers[i] === null) unansweredCount++;
+                }
+                if (unansweredCount > 0) {
+                    alert(`当前页还有 ${unansweredCount} 道题未作答，请完成后再继续！`);
+                    return;
+                }
+                if (currentPage < 3) {
+                    currentPage++;
+                    renderQuestions();
+                } else {
+                    calculateResult();
+                    page2.classList.remove('active');
+                    page3.classList.add('active');
+                }
+            });
+
+            // 计算结果
+            function calculateResult() {
+                let aScore = 0, bScore = 0;
+                answers.slice(0, 6).forEach(score => aScore += parseInt(score));
+                answers.slice(6, 18).forEach(score => bScore += parseInt(score));
+                const totalScore = aScore + bScore;
+                const highRiskCount = answers.slice(0, 6).filter(score => parseInt(score) >= 2).length;
+                
+                let riskLevel = '一般提示', riskDesc = '您的症状与ADHD相关性较低，但仍可结合自身感受咨询专业人士。', riskClass = 'risk-normal';
+                if (highRiskCount >= 4) {
+                    riskLevel = '高风险提示';
+                    riskDesc = '您存在ADHD相关症状的可能性较高，建议尽快前往正规医疗机构的精神科、心理科就诊，由专业人员进行临床评估。';
+                    riskClass = 'risk-high';
+                }
+
+                // 更新结果页
+                coreScoreText.textContent = highRiskCount;
+                riskLevelText.textContent = riskLevel;
+                riskLevelText.className = riskClass;
+                riskDescText.textContent = riskDesc;
+                aScoreText.textContent = aScore;
+                bScoreText.textContent = bScore;
+                totalScoreText.textContent = totalScore;
+
+                // 保存测试记录
+                const newRecord = {
+                    date: new Date().toLocaleDateString(),
+                    riskLevel: riskLevel,
+                    totalScore: totalScore,
+                    aScore: aScore,
+                    bScore: bScore,
+                    answers: [...answers]
+                };
+                testRecords.push(newRecord);
+                localStorage.setItem('adhdTestRecords', JSON.stringify(testRecords));
+                renderTestRecords();
+            }
+
+            // 渲染测试记录
+            function renderTestRecords() {
+                if (testRecords.length > 0) {
+                    let recordHtml = '<ul style="line-height: 1.8; padding-left: 1.5rem;">';
+                    testRecords.forEach((record, index) => {
+                        recordHtml += `
+                            <li>
+                                ${index+1}. ${record.date} - 风险等级：${record.riskLevel} - 总分：${record.totalScore}
+                                <button class="btn btn-sm btn-outline-primary ms-2" onclick="showRecordDetail(${index})">查看详情</button>
+                            </li>
+                        `;
+                    });
+                    recordHtml += '</ul>';
+                    testRecordEl.innerHTML = recordHtml;
+                } else {
+                    testRecordEl.innerHTML = '<p class="text-muted">暂无历史测试记录</p>';
+                }
+            }
+
+            // 显示测试详情
+            window.showRecordDetail = function(index) {
+                const record = testRecords[index];
+                const coreHighRisk = record.answers.slice(0,6).filter(s => parseInt(s)>=2).length;
+                let detailHtml = `
+                    <p><strong>测试日期：</strong>${record.date}</p>
+                    <p><strong>风险等级：</strong>${record.riskLevel}</p>
+                    <p><strong>核心题高风险项：</strong>${coreHighRisk}/6</p>
+                    <p><strong>得分详情：</strong>核心题${record.aScore}/18，补充题${record.bScore}/36，总分${record.totalScore}/54</p>
+                    <h6 class="mt-3 mb-2">答题记录（共18题）：</h6>
+                `;
+                record.answers.forEach((score, idx) => {
+                    const scoreText = ['从不', '很少', '有时', '经常'][parseInt(score)];
+                    detailHtml += `<p>${questions[idx].id}. ${questions[idx].content} → ${scoreText}</p>`;
+                });
+                modalBody.innerHTML = detailHtml;
+                detailModal.style.display = 'flex';
+            }
+
+        });
+    </script>
+</body>
+</html>
